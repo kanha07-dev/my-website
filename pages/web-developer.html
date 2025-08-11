@@ -1,119 +1,167 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" >
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Slot + Wallet (Instant Add Funds)</title>
+  <!-- Bootstrap CSS CDN -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
   <style>
     body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-      padding: 20px;
+      min-height: 100vh;
+      background: #f8f9fa;
     }
     .slot {
-      display: inline-block;
-      font-size: 2rem;
-      border: 2px solid #333;
-      padding: 10px 20px;
-      margin: 5px;
-      width: 50px;
-      background: #f0f0f0;
+      font-size: 3rem;
+      border: 3px solid #343a40;
+      border-radius: 0.5rem;
+      width: 70px;
+      height: 70px;
+      line-height: 70px;
+      margin: 0 8px;
+      background: white;
+      user-select: none;
     }
-    .modal {
-      display: none;
-      position: fixed;
-      left: 0; top: 0;
-      width: 100%; height: 100%;
-      background: rgba(0,0,0,0.5);
-      align-items: center;
-      justify-content: center;
+    #gameResult {
+      min-height: 2em;
+      font-weight: 600;
+      margin-top: 15px;
     }
-    .modal-content {
-      background: #fff;
-      padding: 20px;
-      border-radius: 8px;
-      max-width: 400px;
-      width: 90%;
-      text-align: left;
-    }
-    input {
-      width: 100%;
-      padding: 8px;
-      margin: 6px 0;
-      box-sizing: border-box;
-    }
-    button {
-      padding: 8px 12px;
-      margin: 6px 0;
+    /* Modal QR container */
+    #qrCode {
+      margin: 0 auto 15px auto;
+      width: 200px;
+      height: 200px;
     }
   </style>
 </head>
 <body>
-  <h1>Web Developer</h1>
-  <p>Welcome to the Web Developer page!</p>
+  <div class="container py-4">
+    <h1 class="text-center mb-4">Web Developer Slot Machine 🎰</h1>
 
-  <form id="contactForm">
-    <label>Name:</label><br />
-    <input id="name" required /><br />
-    <label>Email:</label><br />
-    <input id="email" type="email" required /><br />
-    <button type="submit">Submit</button>
-  </form>
-
-  <div id="gameArea" style="display: none">
-    <h2>🎰 Slot Machine 🎰</h2>
-    <div>💰 Wallet: ₹<span id="walletBalance">50</span></div>
-    <p>Choose Bet:</p>
-    <button class="bet-btn" data-bet="1">₹1</button>
-    <button class="bet-btn" data-bet="2">₹2</button>
-    <button class="bet-btn" data-bet="5">₹5</button>
-    <div>
-      <span class="slot" id="slot1">?</span>
-      <span class="slot" id="slot2">?</span>
-      <span class="slot" id="slot3">?</span>
+    <!-- Contact form -->
+    <div id="contactSection" class="mx-auto" style="max-width: 400px;">
+      <form id="contactForm" class="card p-4 shadow-sm bg-white rounded">
+        <div class="mb-3">
+          <label for="name" class="form-label">Name:</label>
+          <input id="name" type="text" class="form-control" required />
+        </div>
+        <div class="mb-3">
+          <label for="email" class="form-label">Email:</label>
+          <input id="email" type="email" class="form-control" required />
+        </div>
+        <button type="submit" class="btn btn-primary w-100">Submit</button>
+      </form>
     </div>
-    <button id="playBtn" disabled>Spin</button>
-    <div id="gameResult"></div>
-    <button id="addFundsBtn">➕ Add Funds</button>
+
+    <!-- Game area -->
+    <div id="gameArea" class="text-center mt-5" style="display: none;">
+      <div class="mb-3">
+        <h2>🎰 Slot Machine</h2>
+        <div class="fs-4">💰 Wallet: ₹<span id="walletBalance">50</span></div>
+      </div>
+
+      <div class="mb-3">
+        <p>Choose your bet:</p>
+        <div class="d-flex justify-content-center gap-3">
+          <button class="btn btn-outline-primary bet-btn" data-bet="1">₹1</button>
+          <button class="btn btn-outline-primary bet-btn" data-bet="2">₹2</button>
+          <button class="btn btn-outline-primary bet-btn" data-bet="5">₹5</button>
+        </div>
+      </div>
+
+      <div class="d-flex justify-content-center my-3">
+        <div class="slot" id="slot1">?</div>
+        <div class="slot" id="slot2">?</div>
+        <div class="slot" id="slot3">?</div>
+      </div>
+
+      <button id="playBtn" class="btn btn-success mb-3" disabled>Spin</button>
+
+      <div id="gameResult" class="text-center fs-5"></div>
+
+      <button id="addFundsBtn" class="btn btn-warning mt-3">➕ Add Funds</button>
+    </div>
   </div>
 
-  <!-- Add funds modal -->
-  <div id="addFundsModal" class="modal">
-    <div class="modal-content">
-      <div style="float: right"><button id="closeModal">X</button></div>
-      <h3>Add Funds</h3>
-      <p>Scan QR to pay (use your UPI app) — then enter the amount and UTR and click Confirm.</p>
-      <img src="/img/scanner.jpg" style="max-width: 200px; display: block; margin: 8px auto" alt="QR" />
-      <label>Amount (₹)</label>
-      <input id="amountInput" type="number" min="1" />
-      <label>UTR / Transaction ID</label>
-      <input id="utrInput" />
-      <div style="text-align: right">
-        <button id="confirmFunds">Confirm Payment</button>
+  <!-- Add Funds Modal -->
+  <div class="modal fade" id="addFundsModal" tabindex="-1" aria-labelledby="addFundsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="addFundsModalLabel">Add Funds</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="closeModalBtn"></button>
+        </div>
+        <div class="modal-body text-center">
+          <p>Scan this UPI QR code with your app and then enter the amount and UTR below:</p>
+          <div id="qrCode"></div>
+          <div class="mb-3">
+            <label for="amountInput" class="form-label">Amount (₹)</label>
+            <input id="amountInput" type="number" min="1" class="form-control" />
+          </div>
+          <div class="mb-3">
+            <label for="utrInput" class="form-label">UTR / Transaction ID</label>
+            <input id="utrInput" type="text" class="form-control" />
+          </div>
+          <button id="confirmFunds" class="btn btn-primary w-100">Confirm Payment</button>
+        </div>
       </div>
     </div>
   </div>
+
+  <!-- Bootstrap JS Bundle -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- QRCode.js -->
+  <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
 
   <script>
     let wallet = 50;
     let currentBet = 0;
     const symbols = ["🍒", "🍋", "🔔", "🍀", "💎"];
+    const walletBalanceEl = document.getElementById("walletBalance");
+    const playBtn = document.getElementById("playBtn");
+    const gameResultEl = document.getElementById("gameResult");
+    const addFundsModalEl = document.getElementById("addFundsModal");
+    const addFundsModal = new bootstrap.Modal(addFundsModalEl);
 
-    document.getElementById("contactForm").addEventListener("submit", (e) => {
-      e.preventDefault();
-      document.getElementById("gameArea").style.display = "block";
-      document.getElementById("contactForm").style.display = "none";
-    });
+    // Your UPI ID here (change as needed)
+    const upiID = "yourupiid@bank";
 
-    document.querySelectorAll(".bet-btn").forEach(btn => {
-      btn.addEventListener("click", () => {
-        currentBet = Number(btn.getAttribute("data-bet"));
-        document.getElementById("playBtn").disabled = false;
-        alert(`Bet set to ₹${currentBet}`);
+    // Construct UPI payment URL for QR
+    // Format: upi://pay?pa=yourupiid@bank&pn=YourName&am= &cu=INR
+    // Leave amount empty for dynamic input by user
+    const upiURL = `upi://pay?pa=${encodeURIComponent(upiID)}&pn=Web%20Developer&cu=INR`;
+
+    // Generate QR code on modal show
+    addFundsModalEl.addEventListener("show.bs.modal", () => {
+      const qrContainer = document.getElementById("qrCode");
+      qrContainer.innerHTML = ""; // clear previous qr
+      QRCode.toCanvas(qrContainer, upiURL, { width: 200 }, function (error) {
+        if (error) console.error(error);
       });
     });
 
-    document.getElementById("playBtn").addEventListener("click", () => {
+    // Contact form submission - show game
+    document.getElementById("contactForm").addEventListener("submit", (e) => {
+      e.preventDefault();
+      document.getElementById("gameArea").style.display = "block";
+      document.getElementById("contactSection").style.display = "none";
+    });
+
+    // Bet buttons
+    document.querySelectorAll(".bet-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        currentBet = Number(btn.getAttribute("data-bet"));
+        playBtn.disabled = false;
+        gameResultEl.textContent = "";
+        // Highlight selected bet
+        document.querySelectorAll(".bet-btn").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+      });
+    });
+
+    // Spin slot machine
+    playBtn.addEventListener("click", () => {
       if (!currentBet) {
         alert("Select a bet");
         return;
@@ -134,20 +182,22 @@
         const win = currentBet * 10;
         wallet += win;
         updateWallet();
-        document.getElementById("gameResult").textContent = `🎉 JACKPOT! ₹${win} added!`;
+        gameResultEl.textContent = `🎉 JACKPOT! ₹${win} added!`;
+        gameResultEl.classList.remove("text-danger");
+        gameResultEl.classList.add("text-success");
       } else {
-        document.getElementById("gameResult").textContent = "😢 Try again!";
+        gameResultEl.textContent = "😢 Try again!";
+        gameResultEl.classList.remove("text-success");
+        gameResultEl.classList.add("text-danger");
       }
     });
 
+    // Show add funds modal
     document.getElementById("addFundsBtn").addEventListener("click", () => {
-      document.getElementById("addFundsModal").style.display = "flex";
-    });
-    document.getElementById("closeModal").addEventListener("click", () => {
-      document.getElementById("addFundsModal").style.display = "none";
-      clearAddFundsInputs();
+      addFundsModal.show();
     });
 
+    // Confirm funds
     document.getElementById("confirmFunds").addEventListener("click", () => {
       const amount = Number(document.getElementById("amountInput").value);
       const utr = document.getElementById("utrInput").value.trim();
@@ -164,12 +214,13 @@
       wallet += amount;
       updateWallet();
       alert(`✅ ₹${amount} added to your wallet successfully!`);
-      document.getElementById("addFundsModal").style.display = "none";
+      addFundsModal.hide();
       clearAddFundsInputs();
     });
 
+    // Utility functions
     function updateWallet() {
-      document.getElementById("walletBalance").textContent = wallet;
+      walletBalanceEl.textContent = wallet;
     }
 
     function clearAddFundsInputs() {
