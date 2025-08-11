@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Slot + Wallet (Instant Add Funds)</title>
-  <!-- Bootstrap CSS CDN -->
+  <!-- Bootstrap CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
   <style>
     body {
@@ -21,17 +21,23 @@
       margin: 0 8px;
       background: white;
       user-select: none;
+      display: inline-block;
+      text-align: center;
     }
     #gameResult {
       min-height: 2em;
       font-weight: 600;
       margin-top: 15px;
     }
-    /* Modal QR container */
     #qrCode {
       margin: 0 auto 15px auto;
       width: 200px;
       height: 200px;
+    }
+    .bet-btn.active {
+      background-color: #0d6efd;
+      color: white;
+      border-color: #0d6efd;
     }
   </style>
 </head>
@@ -44,11 +50,11 @@
       <form id="contactForm" class="card p-4 shadow-sm bg-white rounded">
         <div class="mb-3">
           <label for="name" class="form-label">Name:</label>
-          <input id="name" type="text" class="form-control" required />
+          <input id="name" type="text" class="form-control" required autocomplete="off" />
         </div>
         <div class="mb-3">
           <label for="email" class="form-label">Email:</label>
-          <input id="email" type="email" class="form-control" required />
+          <input id="email" type="email" class="form-control" required autocomplete="off" />
         </div>
         <button type="submit" class="btn btn-primary w-100">Submit</button>
       </form>
@@ -63,10 +69,10 @@
 
       <div class="mb-3">
         <p>Choose your bet:</p>
-        <div class="d-flex justify-content-center gap-3">
-          <button class="btn btn-outline-primary bet-btn" data-bet="1">₹1</button>
-          <button class="btn btn-outline-primary bet-btn" data-bet="2">₹2</button>
-          <button class="btn btn-outline-primary bet-btn" data-bet="5">₹5</button>
+        <div class="d-flex justify-content-center gap-3 flex-wrap">
+          <button class="btn btn-outline-primary bet-btn" data-bet="1" type="button">₹1</button>
+          <button class="btn btn-outline-primary bet-btn" data-bet="2" type="button">₹2</button>
+          <button class="btn btn-outline-primary bet-btn" data-bet="5" type="button">₹5</button>
         </div>
       </div>
 
@@ -94,14 +100,14 @@
         </div>
         <div class="modal-body text-center">
           <p>Scan this UPI QR code with your app and then enter the amount and UTR below:</p>
-          <div id="qrCode"></div>
+          <canvas id="qrCode"></canvas>
           <div class="mb-3">
             <label for="amountInput" class="form-label">Amount (₹)</label>
-            <input id="amountInput" type="number" min="1" class="form-control" />
+            <input id="amountInput" type="number" min="1" class="form-control" autocomplete="off" />
           </div>
           <div class="mb-3">
             <label for="utrInput" class="form-label">UTR / Transaction ID</label>
-            <input id="utrInput" type="text" class="form-control" />
+            <input id="utrInput" type="text" class="form-control" autocomplete="off" />
           </div>
           <button id="confirmFunds" class="btn btn-primary w-100">Confirm Payment</button>
         </div>
@@ -115,6 +121,7 @@
   <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
 
   <script>
+    // Initial wallet balance
     let wallet = 50;
     let currentBet = 0;
     const symbols = ["🍒", "🍋", "🔔", "🍀", "💎"];
@@ -124,43 +131,52 @@
     const addFundsModalEl = document.getElementById("addFundsModal");
     const addFundsModal = new bootstrap.Modal(addFundsModalEl);
 
-    // Your UPI ID here (change as needed)
-    const upiID = "yourupiid@bank";
+    // Your UPI ID (change this)
+    const upiID = "8144091101-2@ybl";
 
-    // Construct UPI payment URL for QR
-    // Format: upi://pay?pa=yourupiid@bank&pn=YourName&am= &cu=INR
-    // Leave amount empty for dynamic input by user
-    const upiURL = `upi://pay?pa=${encodeURIComponent(upiID)}&pn=Web%20Developer&cu=INR`;
-
-    // Generate QR code on modal show
-    addFundsModalEl.addEventListener("show.bs.modal", () => {
+    // Utility functions
+    function updateWallet() {
+      walletBalanceEl.textContent = wallet;
+    }
+    function clearAddFundsInputs() {
+      document.getElementById("amountInput").value = "";
+      document.getElementById("utrInput").value = "";
+    }
+    function resetGameResult() {
+      gameResultEl.textContent = "";
+      gameResultEl.classList.remove("text-success", "text-danger");
+    }
+    function generateUpiQr(amount = "") {
       const qrContainer = document.getElementById("qrCode");
-      qrContainer.innerHTML = ""; // clear previous qr
-      QRCode.toCanvas(qrContainer, upiURL, { width: 200 }, function (error) {
+      let url = `upi://pay?pa=${encodeURIComponent(upiID)}&pn=Web%20Developer&cu=INR`;
+      if (amount && amount > 0) {
+        url += `&am=${amount}`;
+      }
+      QRCode.toCanvas(qrContainer, url, { width: 200 }, function (error) {
         if (error) console.error(error);
       });
-    });
+    }
 
-    // Contact form submission - show game
+    // Contact form submit -> show game
     document.getElementById("contactForm").addEventListener("submit", (e) => {
       e.preventDefault();
       document.getElementById("gameArea").style.display = "block";
       document.getElementById("contactSection").style.display = "none";
     });
 
-    // Bet buttons
+    // Bet button clicks
     document.querySelectorAll(".bet-btn").forEach(btn => {
       btn.addEventListener("click", () => {
         currentBet = Number(btn.getAttribute("data-bet"));
         playBtn.disabled = false;
-        gameResultEl.textContent = "";
+        resetGameResult();
         // Highlight selected bet
         document.querySelectorAll(".bet-btn").forEach(b => b.classList.remove("active"));
         btn.classList.add("active");
       });
     });
 
-    // Spin slot machine
+    // Spin slots
     playBtn.addEventListener("click", () => {
       if (!currentBet) {
         alert("Select a bet");
@@ -172,12 +188,15 @@
       }
       wallet -= currentBet;
       updateWallet();
+
       const s1 = symbols[Math.floor(Math.random() * symbols.length)];
       const s2 = symbols[Math.floor(Math.random() * symbols.length)];
       const s3 = symbols[Math.floor(Math.random() * symbols.length)];
+
       document.getElementById("slot1").textContent = s1;
       document.getElementById("slot2").textContent = s2;
       document.getElementById("slot3").textContent = s3;
+
       if (s1 === s2 && s2 === s3) {
         const win = currentBet * 10;
         wallet += win;
@@ -192,12 +211,20 @@
       }
     });
 
-    // Show add funds modal
+    // Show add funds modal & generate initial QR
     document.getElementById("addFundsBtn").addEventListener("click", () => {
+      clearAddFundsInputs();
+      generateUpiQr();
       addFundsModal.show();
     });
 
-    // Confirm funds
+    // Update QR when amount input changes
+    document.getElementById("amountInput").addEventListener("input", (e) => {
+      const amount = e.target.value;
+      generateUpiQr(amount);
+    });
+
+    // Confirm payment
     document.getElementById("confirmFunds").addEventListener("click", () => {
       const amount = Number(document.getElementById("amountInput").value);
       const utr = document.getElementById("utrInput").value.trim();
@@ -214,19 +241,12 @@
       wallet += amount;
       updateWallet();
       alert(`✅ ₹${amount} added to your wallet successfully!`);
-      addFundsModal.hide();
+
       clearAddFundsInputs();
+      generateUpiQr(); // reset QR without amount
+
+      // Modal stays open, user can add more funds if they want
     });
-
-    // Utility functions
-    function updateWallet() {
-      walletBalanceEl.textContent = wallet;
-    }
-
-    function clearAddFundsInputs() {
-      document.getElementById("amountInput").value = "";
-      document.getElementById("utrInput").value = "";
-    }
   </script>
 </body>
 </html>
