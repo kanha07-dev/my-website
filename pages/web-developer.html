@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Slot + Wallet (Instant Add Funds)</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 20px;
+    }
+    .slot {
+      display: inline-block;
+      font-size: 2rem;
+      border: 2px solid #333;
+      padding: 10px 20px;
+      margin: 5px;
+      width: 50px;
+      background: #f0f0f0;
+    }
+    .modal {
+      display: none;
+      position: fixed;
+      left: 0; top: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.5);
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-content {
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      max-width: 400px;
+      width: 90%;
+      text-align: left;
+    }
+    input {
+      width: 100%;
+      padding: 8px;
+      margin: 6px 0;
+      box-sizing: border-box;
+    }
+    button {
+      padding: 8px 12px;
+      margin: 6px 0;
+    }
+  </style>
+</head>
+<body>
+  <h1>Web Developer</h1>
+  <p>Welcome to the Web Developer page!</p>
+
+  <form id="contactForm">
+    <label>Name:</label><br />
+    <input id="name" required /><br />
+    <label>Email:</label><br />
+    <input id="email" type="email" required /><br />
+    <button type="submit">Submit</button>
+  </form>
+
+  <div id="gameArea" style="display: none">
+    <h2>🎰 Slot Machine 🎰</h2>
+    <div>💰 Wallet: ₹<span id="walletBalance">50</span></div>
+    <p>Choose Bet:</p>
+    <button class="bet-btn" data-bet="1">₹1</button>
+    <button class="bet-btn" data-bet="2">₹2</button>
+    <button class="bet-btn" data-bet="5">₹5</button>
+    <div>
+      <span class="slot" id="slot1">?</span>
+      <span class="slot" id="slot2">?</span>
+      <span class="slot" id="slot3">?</span>
+    </div>
+    <button id="playBtn" disabled>Spin</button>
+    <div id="gameResult"></div>
+    <button id="addFundsBtn">➕ Add Funds</button>
+  </div>
+
+  <!-- Add funds modal -->
+  <div id="addFundsModal" class="modal">
+    <div class="modal-content">
+      <div style="float: right"><button id="closeModal">X</button></div>
+      <h3>Add Funds</h3>
+      <p>Scan QR to pay (use your UPI app) — then enter the amount and UTR and click Confirm.</p>
+      <img src="/img/scanner.jpg" style="max-width: 200px; display: block; margin: 8px auto" alt="QR" />
+      <label>Amount (₹)</label>
+      <input id="amountInput" type="number" min="1" />
+      <label>UTR / Transaction ID</label>
+      <input id="utrInput" />
+      <div style="text-align: right">
+        <button id="confirmFunds">Confirm Payment</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let wallet = 50;
+    let currentBet = 0;
+    const symbols = ["🍒", "🍋", "🔔", "🍀", "💎"];
+
+    document.getElementById("contactForm").addEventListener("submit", (e) => {
+      e.preventDefault();
+      document.getElementById("gameArea").style.display = "block";
+      document.getElementById("contactForm").style.display = "none";
+    });
+
+    document.querySelectorAll(".bet-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        currentBet = Number(btn.getAttribute("data-bet"));
+        document.getElementById("playBtn").disabled = false;
+        alert(`Bet set to ₹${currentBet}`);
+      });
+    });
+
+    document.getElementById("playBtn").addEventListener("click", () => {
+      if (!currentBet) {
+        alert("Select a bet");
+        return;
+      }
+      if (wallet < currentBet) {
+        alert("Insufficient funds");
+        return;
+      }
+      wallet -= currentBet;
+      updateWallet();
+      const s1 = symbols[Math.floor(Math.random() * symbols.length)];
+      const s2 = symbols[Math.floor(Math.random() * symbols.length)];
+      const s3 = symbols[Math.floor(Math.random() * symbols.length)];
+      document.getElementById("slot1").textContent = s1;
+      document.getElementById("slot2").textContent = s2;
+      document.getElementById("slot3").textContent = s3;
+      if (s1 === s2 && s2 === s3) {
+        const win = currentBet * 10;
+        wallet += win;
+        updateWallet();
+        document.getElementById("gameResult").textContent = `🎉 JACKPOT! ₹${win} added!`;
+      } else {
+        document.getElementById("gameResult").textContent = "😢 Try again!";
+      }
+    });
+
+    document.getElementById("addFundsBtn").addEventListener("click", () => {
+      document.getElementById("addFundsModal").style.display = "flex";
+    });
+    document.getElementById("closeModal").addEventListener("click", () => {
+      document.getElementById("addFundsModal").style.display = "none";
+      clearAddFundsInputs();
+    });
+
+    document.getElementById("confirmFunds").addEventListener("click", () => {
+      const amount = Number(document.getElementById("amountInput").value);
+      const utr = document.getElementById("utrInput").value.trim();
+
+      if (!amount || amount <= 0) {
+        alert("Enter valid amount");
+        return;
+      }
+      if (!utr || utr.length < 4) {
+        alert("Enter valid UTR");
+        return;
+      }
+
+      wallet += amount;
+      updateWallet();
+      alert(`✅ ₹${amount} added to your wallet successfully!`);
+      document.getElementById("addFundsModal").style.display = "none";
+      clearAddFundsInputs();
+    });
+
+    function updateWallet() {
+      document.getElementById("walletBalance").textContent = wallet;
+    }
+
+    function clearAddFundsInputs() {
+      document.getElementById("amountInput").value = "";
+      document.getElementById("utrInput").value = "";
+    }
+  </script>
+</body>
+</html>

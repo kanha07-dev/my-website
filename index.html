@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Krish — Portfolio</title>
+    <!-- Bootstrap 5 CSS -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        background: linear-gradient(135deg, #0f172a, #06202a);
+        color: #e6eef7;
+      }
+      .avatar {
+        width: 100px;
+        height: 100px;
+        object-fit: cover;
+        border-radius: 50%;
+        border: 3px solid rgba(255, 255, 255, 0.1);
+        transition: transform 0.25s ease, box-shadow 0.25s ease;
+      }
+      .avatar:hover {
+        transform: scale(1.05);
+        box-shadow: 0 10px 30px rgba(14, 165, 160, 0.3);
+      }
+      .role-link {
+        color: #9fb3c8;
+        text-decoration: none;
+      }
+      .role-link:hover {
+        color: #0ea5a0;
+        text-decoration: underline;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container py-5">
+      <header
+        class="bg-dark bg-opacity-50 p-4 rounded shadow-lg d-flex align-items-center flex-wrap gap-4"
+      >
+        <img src="/img/image1.png" alt="Krish" class="avatar" />
+        <div>
+          <h1 class="h3 fw-bold mb-2">Krish</h1>
+          <div class="fs-6">
+            <a href="/pages/web-developer.html" class="role-link me-2"
+              >Web Developer</a
+            >
+            •
+            <a href="/pages/designer.html" class="role-link mx-2">Designer</a> •
+            <a href="/pages/creator.html" class="role-link ms-2">Creator</a>
+          </div>
+        </div>
+      </header>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  </body>
+</html>
